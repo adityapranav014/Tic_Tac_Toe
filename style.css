@@ -1,0 +1,266 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background: linear-gradient(135deg, #2c2f3a, #1a1a1d); /* Darker tones for an immersive, less distracting background */
+    color: #e0e0e0; /* Slightly softer white for text */
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Layout styles */
+#gameContainer {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    margin: auto;
+    padding: 20px;
+    border: 2px dotted rgba(69, 72, 85, 0.5);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 10px; 
+}
+
+#scoreboard {
+    background: #2b2e37;
+    border: 2px solid #454855;
+    border-radius: 12px;
+    color: #f0f0f0;
+    max-width: 250px; 
+    font-size: 0.9rem;
+    margin: 20px auto;
+}
+
+#cellContainer {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 210px;
+    margin: auto;
+    gap: 4px;
+    padding: 10px;
+    background: linear-gradient(135deg, #ff6b6f, #ffab5a); /* Warmer gradient to add energy */
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    border-top: 4px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 4px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Cell styles */
+.cell {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85); /* Slight opacity for depth */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: #333333; /* Dark color for contrast */
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s, box-shadow 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover effect for each cell */
+.cell:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.05);
+    box-shadow: 0 0.375rem 0.625rem rgba(0, 0, 0, 0.25);
+}
+
+/* Button styles */
+.btn {
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    background: #2b2e37;
+    border: 2px solid #454855;
+    border-radius: 12px;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 9px 13px;
+}
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    fill: #f0f0f0;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.container {
+    margin: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+/* Reverse button order for mobile */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column-reverse;
+        align-items: center; /* Optional, centers the buttons on mobile */
+    }
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+.btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.bounce {
+    animation: bounce 1s infinite;
+}
+
+/* Status text styles */
+#statusText {
+    margin: 20px auto;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #ffd54f; 
+    transition: color 0.3s ease;
+    animation: fadeIn 0.5s ease, statusPop 1s ease;
+}
+
+/* Score styles */
+.score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+/* Highlight the winning team */
+.highlight {
+    background: linear-gradient(135deg, #ffecb3, #ffc107);
+    color: #333;
+}
+
+/* Trophy icon for the leading team */
+.trophy-emoji {
+    font-size: 1rem;
+    color: #ffc107; 
+    opacity: 0.9;
+}
+
+/* Animation styles */
+@keyframes pop {
+    0% {
+        transform: scale(0);
+    }
+
+    60% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes statusPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes zoomInOut {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    25% {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    50% {
+        transform: scale(1.2) rotate(-5deg);
+    }
+
+    75% {
+        transform: scale(1.1) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.zoom {
+    animation: zoomInOut 0.8s ease-in-out;
+}
+
+/* Cell click animation */
+.cell.clicked {
+    animation: pop 0.2s ease;
+}
+
+/* Pulse animation for score update */
+.score-updated {
+    color: #ffc107;
+    animation: pulseScore 0.6s ease-in-out;
+}
+
+@keyframes pulseScore {
+    0% {
+        transform: scale(1);
+        color: #ffc107;
+    }
+
+    50% {
+        transform: scale(1.2);
+        color: #fff8e1; /* Lighter gold for pulse */
+    }
+
+    100% {
+        transform: scale(1);
+        color: #ffc107;
+    }
+}
+
+/* Bouncing trophy icon animation */
+@keyframes bounce {
+    from,
+    to {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
