@@ -6,8 +6,10 @@
 }
 
 body {
-    background: linear-gradient(135deg, #2c2f3a, #1a1a1d); /* Darker tones for an immersive, less distracting background */
-    color: #e0e0e0; /* Slightly softer white for text */
+    background: linear-gradient(135deg, #2c2f3a, #1a1a1d);
+    /* Darker tones for an immersive, less distracting background */
+    color: #e0e0e0;
+    /* Slightly softer white for text */
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
@@ -22,10 +24,10 @@ body {
     font-family: 'Poppins', sans-serif;
     text-align: center;
     margin: auto;
-    padding: 20px;
+    padding: 20px 10%;
     border: 2px dotted rgba(69, 72, 85, 0.5);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-    border-radius: 10px; 
+    border-radius: 10px;
 }
 
 #scoreboard {
@@ -33,7 +35,7 @@ body {
     border: 2px solid #454855;
     border-radius: 12px;
     color: #f0f0f0;
-    max-width: 250px; 
+    max-width: 250px;
     font-size: 0.9rem;
     margin: 20px auto;
 }
@@ -45,7 +47,8 @@ body {
     margin: auto;
     gap: 4px;
     padding: 10px;
-    background: linear-gradient(135deg, #ff6b6f, #ffab5a); /* Warmer gradient to add energy */
+    background: linear-gradient(135deg, #ff6b6f, #ffab5a);
+    /* Warmer gradient to add energy */
     border-radius: 15px;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     border-top: 4px solid rgba(255, 255, 255, 0.4);
@@ -57,13 +60,15 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.85); /* Slight opacity for depth */
+    background: rgba(255, 255, 255, 0.85);
+    /* Slight opacity for depth */
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 40px;
     font-weight: bold;
-    color: #333333; /* Dark color for contrast */
+    color: #333333;
+    /* Dark color for contrast */
     cursor: pointer;
     transition: transform 0.2s, background 0.3s, box-shadow 0.2s;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -104,13 +109,6 @@ body {
     gap: 10px;
 }
 
-/* Reverse button order for mobile */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column-reverse;
-        align-items: center; /* Optional, centers the buttons on mobile */
-    }
-}
 
 .btn:hover {
     transform: translateY(-2px);
@@ -131,7 +129,7 @@ body {
     margin: 20px auto;
     font-weight: bold;
     font-size: 1.1rem;
-    color: #ffd54f; 
+    color: #ffd54f;
     transition: color 0.3s ease;
     animation: fadeIn 0.5s ease, statusPop 1s ease;
 }
@@ -155,7 +153,7 @@ body {
 /* Trophy icon for the leading team */
 .trophy-emoji {
     font-size: 1rem;
-    color: #ffc107; 
+    color: #ffc107;
     opacity: 0.9;
 }
 
@@ -235,7 +233,8 @@ body {
 
     50% {
         transform: scale(1.2);
-        color: #fff8e1; /* Lighter gold for pulse */
+        color: #fff8e1;
+        /* Lighter gold for pulse */
     }
 
     100% {
@@ -246,6 +245,7 @@ body {
 
 /* Bouncing trophy icon animation */
 @keyframes bounce {
+
     from,
     to {
         transform: translateY(0);
@@ -260,7 +260,52 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
+    }
+}
+
+/* Responsive Layout for Mobile */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    #gameContainer {
+        box-shadow: none;
+        border: none;
+        
+    }
+
+    #scoreboard {
+        font-size: 0.8rem;
+        max-width: 90%;
+        margin: 10px auto;
+    }
+
+    #statusText {
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+
+    .container {
+        flex-direction: column-reverse;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+
+}
+
+/* For ultra-small screens like phones in portrait mode */
+@media (max-width: 480px) {
+    .btn {
+        font-size: 0.75rem;
+        padding: 6px 8px;
     }
 }
