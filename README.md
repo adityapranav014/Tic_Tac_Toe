@@ -1,4 +1,4 @@
 # Tic_Tac_Toe
 Challenge Your Mind with Tic Tac Toe - Play Now for Free!
 
-![Screenshot 2024-11-17 152002](https://github.com/user-attachments/assets/72ca94d9-1bd6-4b1a-aca6-25b0db5c4d88)
+![Tic_Tac_Toe](https://github.com/user-attachments/assets/7bca05f6-66c9-4e2c-b25c-505d8e5f580d)
