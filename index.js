@@ -2,198 +2,406 @@
 const cells = document.querySelectorAll(".cell");
 const statusText = document.querySelector("#statusText");
 const restartBtn = document.querySelector("#restartBtn");
-const oScoreElement = document.getElementById('oScore');
-const xScoreElement = document.getElementById('xScore');
-const oScoreContainer = document.getElementById('oScoreContainer');
-const xScoreContainer = document.getElementById('xScoreContainer');
-const oTrophy = document.getElementById('oTrophy');
-const xTrophy = document.getElementById('xTrophy');
-const playWithAIButton = document.getElementById('playWithAIButton'); // New button element
+const newTournamentBtn = document.querySelector("#newTournamentBtn");
+const humanScoreElement = document.getElementById("oScore");
+const aiScoreElement = document.getElementById("xScore");
+const humanScoreContainer = document.getElementById("oScoreContainer");
+const aiScoreContainer = document.getElementById("xScoreContainer");
+const humanTrophy = document.getElementById("oTrophy");
+const aiTrophy = document.getElementById("xTrophy");
+const gameCountText = document.getElementById("gameCountText");
 
-// Game Variables
+// Game Config
 const winConditions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
 ];
 
-let options = Array(9).fill(""); // Array to track cell states
-let currentPlayer = "⭕"; // Current player symbol
-let running = false; // Game state
-let oScore = 0; // Player O's score
-let xScore = 0; // Player X's score
-let isPlayingWithAi = false; // Flag to track if AI mode is enabled
-let aiSymbol = ""; // Variable to store AI's symbol
+let options = Array(9).fill("");
+let currentPlayer = "⭕";
+let humanSymbol = "⭕";
+let aiSymbol = "✖️";
+let running = false;
 
-// Initialize the game
-initializeGame();
+let humanScore = 0;
+let aiScore = 0;
+let gamesPlayed = 0;
+let totalGames = 6;
+let firstPlayerIsUser = true;
+
+// Initialize
+document.addEventListener("DOMContentLoaded", initializeGame);
 
 function initializeGame() {
     running = true;
-    options.fill(""); // Reset the options array
+    options.fill("");
     cells.forEach((cell, index) => {
-        cell.textContent = ""; // Clear cell text
+        cell.textContent = "";
+        cell.style.backgroundColor = "";
         cell.setAttribute("cellIndex", index);
+        cell.removeEventListener("click", cellClicked);
         cell.addEventListener("click", cellClicked);
+        cell.style.pointerEvents = "auto";
     });
+
+    restartBtn.removeEventListener("click", restartGame);
     restartBtn.addEventListener("click", restartGame);
-    playWithAIButton.addEventListener("click", togglePlayWithAI); // New AI mode button listener
-    updateStatusText(`${currentPlayer}'s turn`);
-}
 
-// Toggle AI play mode
-function togglePlayWithAI() {
-    isPlayingWithAi = !isPlayingWithAi;
-    playWithAIButton.textContent = isPlayingWithAi ? "🤖 Playing with AI" : "🤖 Play With AI";
+    // Determine who should start based on game number
+    firstPlayerIsUser = gamesPlayed % 2 === 0;
 
-    // Apply or remove the border based on AI play mode
-    if (isPlayingWithAi) {
-        playWithAIButton.style.border = "2px solid #FFC71E"; // Add border when playing with AI
+    // Set symbols based on who goes first
+    if (firstPlayerIsUser) {
+        humanSymbol = "⭕";
+        aiSymbol = "✖️";
+        currentPlayer = "⭕"; // Human starts
     } else {
-        playWithAIButton.style.border = ""; // Remove border when not playing with AI
+        humanSymbol = "✖️";
+        aiSymbol = "⭕";
+        currentPlayer = "⭕"; // AI starts
     }
 
-    // Ensure AI always uses "✖️" or "⭕" consistently
-    aiSymbol = "✖️";
-    currentPlayer = "⭕";
-    updateStatusText(`${currentPlayer}'s turn`);
+    updateGameCounterUI();
+    updateStatusText(getTurnText());
+
+    // If AI should go first, make AI move after a short delay
+    if (currentPlayer === aiSymbol) {
+        setTimeout(() => aiMove(), 500);
+    }
 }
 
+function getTurnText() {
+    return currentPlayer === aiSymbol ? "AI's turn" : "Human's turn";
+}
 
-// Update status text with animation
+function updateGameCounterUI() {
+    gameCountText.textContent = `Game ${gamesPlayed + 1} of ${totalGames}`;
+}
+
 function updateStatusText(text) {
     statusText.textContent = text;
     statusText.classList.remove("statusTextUpdated");
-    void statusText.offsetWidth; // Trigger reflow
+    void statusText.offsetWidth;
     statusText.classList.add("statusTextUpdated");
 }
 
-// Cell click handler
 function cellClicked() {
-    if (!isPlayingWithAi) {
-        playWithAIButton.disabled = true;
-        playWithAIButton.style.opacity = "0.5";     
-        playWithAIButton.style.cursor = "not-allowed"; // Change the cursor to indicate it's disabled
-        playWithAIButton.style.pointerEvents = "none"; // Disable hover and click events
-    }
-    const cellIndex = this.getAttribute("cellIndex");
-    if (options[cellIndex] !== "" || !running) return;
+    const index = this.getAttribute("cellIndex");
+    if (options[index] !== "" || !running || currentPlayer === aiSymbol) return;
 
-    updateCell(this, cellIndex);
+    updateCell(this, index);
     this.classList.add("clicked");
-    this.addEventListener("animationend", () => {
-        this.classList.remove("clicked");
-    }, { once: true });
+    this.addEventListener("animationend", () => this.classList.remove("clicked"), { once: true });
 
     checkWinner();
-    if (isPlayingWithAi && running) { // Ensure game is running before AI moves
-        aiMove();
-    }
 }
 
-// Update cell with current player's symbol
 function updateCell(cell, index) {
-    const clickSound = new Audio("clicl-sound.mp3");
-    clickSound.play();
+    try {
+        const clickSound = new Audio("click-sound.mp3");
+        clickSound.play();
+    } catch (e) {
+        // Ignore audio errors
+    }
     options[index] = currentPlayer;
     cell.textContent = currentPlayer;
 }
 
-// Change the current player
 function changePlayer() {
-    currentPlayer = currentPlayer === "✖️" ? "⭕" : "✖️";
-    updateStatusText(`${currentPlayer}'s turn`);
+    currentPlayer = currentPlayer === "⭕" ? "✖️" : "⭕";
+    updateStatusText(getTurnText());
 }
 
-// Check if there's a winner or a draw
 function checkWinner() {
-    let roundWon = false;
+    let winnerFound = false;
 
     for (let [a, b, c] of winConditions) {
-        if (options[a] === "" || options[b] === "" || options[c] === "") continue;
-        if (options[a] === options[b] && options[b] === options[c]) {
-            roundWon = true;
+        if (options[a] && options[a] === options[b] && options[b] === options[c]) {
             highlightWinningCells([a, b, c]);
+            winnerFound = true;
             break;
         }
     }
 
-    if (roundWon) {
-        const wonSound = new Audio("won-sound.mp3");
-        wonSound.play();
-        updateStatusText(`${currentPlayer} wins!`);
-        currentPlayer === '⭕' ? oScore++ : xScore++;
-        updateScoreboard();
+    if (winnerFound) {
+        try {
+            new Audio("won-sound.mp3").play();
+        } catch (e) {
+            // Ignore audio errors
+        }
+        const winner = (currentPlayer === aiSymbol) ? "AI" : "Human";
+        updateStatusText(`${winner} wins!`);
+        updateScore(currentPlayer);
         running = false;
+        disableCells();
         setTimeout(() => restartBtn.classList.add("bounce"), 900);
     } else if (!options.includes("")) {
-        const drawSound = new Audio("draw-sound.mp3");
-        drawSound.play();
-        updateStatusText(`Draw!`);
+        try {
+            new Audio("draw-sound.mp3").play();
+        } catch (e) {
+            // Ignore audio errors
+        }
+        updateStatusText("Draw!");
         running = false;
+        disableCells();
         setTimeout(() => restartBtn.classList.add("bounce"), 900);
     } else {
         changePlayer();
+        // If it's now AI's turn, make AI move
+        if (running && currentPlayer === aiSymbol) {
+            setTimeout(() => aiMove(), 200);
+        }
     }
 }
 
-/// AI Move using enhanced Minimax algorithm with better heuristics
-function aiMove() {
-    const bestMove = findBestMove(options);
-    setTimeout(() => makeMove(bestMove), 100);
+function updateScore(symbol) {
+    const isHuman = symbol === humanSymbol;
+    if (isHuman) {
+        humanScore++;
+        humanScoreElement.textContent = humanScore;
+    } else {
+        aiScore++;
+        aiScoreElement.textContent = aiScore;
+    }
+    updateScoreHighlight();
 }
 
-// Function to find the best move using a modified Minimax algorithm
-function findBestMove(board) {
-    let bestScore = -Infinity;
-    let bestMove = -1;
+function updateScoreHighlight() {
+    const h = humanScore;
+    const a = aiScore;
 
-    // Iterate through all cells to find the best move
-    board.forEach((cell, index) => {
-        if (cell === "") {
-            const boardCopy = [...board];
-            boardCopy[index] = aiSymbol; // Simulate the AI's move
-            const score = minimax(boardCopy, 0, false);
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = index;
+    humanScoreContainer.classList.toggle("highlight", h > a);
+    aiScoreContainer.classList.toggle("highlight", a > h);
+
+    humanTrophy.style.display = h > a ? "inline" : "none";
+    aiTrophy.style.display = a > h ? "inline" : "none";
+}
+
+function highlightWinningCells(indices) {
+    indices.forEach(i => {
+        const cell = cells[i];
+        cell.style.backgroundColor = "yellow";
+        cell.classList.add("zoom");
+        setTimeout(() => cell.style.backgroundColor = "lightgreen", 400);
+        cell.addEventListener("animationend", () => {
+            cell.classList.remove("zoom");
+            cell.style.backgroundColor = "yellow";
+        }, { once: true });
+    });
+}
+
+function disableCells() {
+    cells.forEach(cell => {
+        cell.style.pointerEvents = "none";
+    });
+}
+
+function restartGame() {
+    gamesPlayed++;
+    if (gamesPlayed >= totalGames) {
+        finalizeTournament();
+        return;
+    }
+
+    restartBtn.classList.remove("bounce");
+    initializeGame();
+}
+
+function finalizeTournament() {
+    running = false;
+    const finalText = humanScore > aiScore
+        ? `🏁 Tournament Over! Human wins ${humanScore}–${aiScore}! 🏆`
+        : aiScore > humanScore
+            ? `🏁 Tournament Over! AI wins ${aiScore}–${humanScore}! 🤖`
+            : `🏁 Tournament Over! It's a draw!`;
+
+    updateStatusText(finalText);
+    restartBtn.classList.remove("bounce");
+    setTimeout(() => newTournamentBtn.classList.add("bounce"), 900);
+}
+
+function aiMove() {
+    if (!running || currentPlayer !== aiSymbol) return;
+
+    const bestMove = findBestMove(options);
+    if (bestMove !== -1) {
+        makeMove(bestMove);
+    }
+}
+
+function makeMove(index) {
+    if (options[index] !== "" || !running || index === -1) return;
+    updateCell(cells[index], index);
+    checkWinner();
+}
+
+// Pre-compute winning lines
+const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],  // rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],  // cols
+    [0, 4, 8], [2, 4, 6]           // diagonals
+];
+
+// Simple cache for board evaluations (transposition table)
+const transposition = {};
+
+function findBestMove(board) {
+    // Use a key for caching (e.g. comma-separated)
+    const key = board.join(',');
+    if (transposition[key]) {
+        return transposition[key];
+    }
+
+    // 1. First move: pick center if empty
+    if (board.every(cell => cell === "")) {
+        return 4;
+    }
+
+    // 2. Win: If AI can win in one move, take it
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+            board[i] = aiSymbol;
+            if (checkWinnerStatic(board) === aiSymbol) {
+                board[i] = "";  // restore
+                transposition[key] = i;
+                return i;
+            }
+            board[i] = "";  // restore
+        }
+    }
+
+    // 3. Block: If opponent can win in one move, block it
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+            board[i] = humanSymbol;
+            if (checkWinnerStatic(board) === humanSymbol) {
+                board[i] = "";  // restore
+                transposition[key] = i;
+                return i;
+            }
+            board[i] = "";
+        }
+    }
+
+    // 4. Fork: Create a fork (two threats)
+    // Check all empty cells for AI fork
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+            board[i] = aiSymbol;
+            let winningMoves = 0;
+            // Count how many winning moves this creates
+            for (let j = 0; j < board.length; j++) {
+                if (board[j] === "") {
+                    board[j] = aiSymbol;
+                    if (checkWinnerStatic(board) === aiSymbol) winningMoves++;
+                    board[j] = "";
+                }
+            }
+            board[i] = "";
+            if (winningMoves >= 2) {
+                transposition[key] = i;
+                return i;
             }
         }
-    });
+    }
 
+    // 5. Block opponent's fork
+    // If the opponent has a fork opportunity, block it.
+    // Simplest approach: if there is only one fork, block it.
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+            board[i] = humanSymbol;
+            let oppForks = 0;
+            for (let j = 0; j < board.length; j++) {
+                if (board[j] === "") {
+                    board[j] = humanSymbol;
+                    if (checkWinnerStatic(board) === humanSymbol) oppForks++;
+                    board[j] = "";
+                }
+            }
+            board[i] = "";
+            if (oppForks >= 2) {
+                // Block this fork by playing here
+                transposition[key] = i;
+                return i;
+            }
+        }
+    }
+
+    // 6. Take center if free (Rule 5):contentReference[oaicite:11]{index=11}
+    if (board[4] === "") {
+        transposition[key] = 4;
+        return 4;
+    }
+
+    // 7. Opposite corner: if opponent is in a corner, play opposite corner:contentReference[oaicite:12]{index=12}
+    const corners = [[0, 8], [2, 6], [6, 2], [8, 0]];
+    for (let [c, opp] of corners) {
+        if (board[opp] === humanSymbol && board[c] === "") {
+            transposition[key] = c;
+            return c;
+        }
+    }
+
+    // 8. Empty corner
+    const emptyCorners = [0, 2, 6, 8].filter(i => board[i] === "");
+    if (emptyCorners.length) {
+        const choice = emptyCorners[0];  // pick first available corner
+        transposition[key] = choice;
+        return choice;
+    }
+
+    // 9. Empty side
+    const emptySides = [1, 3, 5, 7].filter(i => board[i] === "");
+    if (emptySides.length) {
+        const choice = emptySides[0];
+        transposition[key] = choice;
+        return choice;
+    }
+
+    // 10. Fallback: use Minimax
+    let bestScore = -Infinity, bestMove = -1;
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+            let tempBoard = [...board];
+            tempBoard[i] = aiSymbol;
+            let score = minimax(tempBoard, 0, false);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = i;
+            }
+        }
+    }
+    transposition[key] = bestMove;
     return bestMove;
 }
 
-// Minimax function with scoring based on potential outcomes
-function minimax(newBoard, depth, isMaximizing) {
-    const winner = checkForWinner(newBoard);
-    if (winner === aiSymbol) return 10 - depth; // AI wins
-    if (winner === (aiSymbol === "✖️" ? "⭕" : "✖️")) return depth - 10; // Opponent wins
-    if (!newBoard.includes("")) return 0; // Draw
+
+function minimax(board, depth, isMaximizing) {
+    let result = checkWinnerStatic(board);
+    if (result === aiSymbol) return 10 - depth;
+    if (result === humanSymbol) return depth - 10;
+    if (!board.includes("")) return 0;
 
     if (isMaximizing) {
         let maxEval = -Infinity;
-        for (let i = 0; i < newBoard.length; i++) {
-            if (newBoard[i] === "") {
-                const boardCopy = [...newBoard];
-                boardCopy[i] = aiSymbol; // AI's move
-                const eval = minimax(boardCopy, depth + 1, false);
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                let newBoard = [...board];
+                newBoard[i] = aiSymbol;
+                let eval = minimax(newBoard, depth + 1, false);
                 maxEval = Math.max(maxEval, eval);
             }
         }
         return maxEval;
     } else {
         let minEval = Infinity;
-        for (let i = 0; i < newBoard.length; i++) {
-            if (newBoard[i] === "") {
-                const boardCopy = [...newBoard];
-                boardCopy[i] = (aiSymbol === "✖️" ? "⭕" : "✖️"); // Opponent's move
-                const eval = minimax(boardCopy, depth + 1, true);
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                let newBoard = [...board];
+                newBoard[i] = humanSymbol;
+                let eval = minimax(newBoard, depth + 1, true);
                 minEval = Math.min(minEval, eval);
             }
         }
@@ -201,91 +409,11 @@ function minimax(newBoard, depth, isMaximizing) {
     }
 }
 
-// Check for a winner in the current board state
-function checkForWinner(board) {
+function checkWinnerStatic(board) {
     for (let [a, b, c] of winConditions) {
-        if (board[a] === "" || board[b] === "" || board[c] === "") continue;
-        if (board[a] === board[b] && board[b] === board[c]) {
-            return board[a]; // Return the winner
+        if (board[a] && board[a] === board[b] && board[b] === board[c]) {
+            return board[a];
         }
     }
-    return null; // No winner
-}
-
-// Make the move for the AI
-function makeMove(index) {
-    const cell = cells[index];
-    if (options[index] !== "" || !running) return;
-
-    updateCell(cell, index);
-    checkWinner();
-}
-
-
-// Highlight winning cells
-function highlightWinningCells(indices) {
-    indices.forEach(index => {
-        const winningCell = cells[index];
-        winningCell.style.backgroundColor = "yellow";
-        winningCell.classList.add("zoom");
-        setTimeout(() => winningCell.style.backgroundColor = "lightgreen", 400);
-
-        winningCell.addEventListener('animationend', () => {
-            winningCell.classList.remove("zoom");
-            winningCell.style.backgroundColor = "yellow";
-        }, { once: true });
-    });
-}
-
-// Update the scoreboard
-function updateScoreboard() {
-    oScoreElement.textContent = oScore;
-
-    if (isPlayingWithAi) {
-        xScoreElement.textContent = `${xScore} 🤖`;
-    } else {
-        xScoreElement.textContent = xScore;
-    }
-
-    const currentScoreElement = currentPlayer === '⭕' ? oScoreElement : xScoreElement;
-    currentScoreElement.classList.add("score-updated");
-    setTimeout(() => currentScoreElement.classList.remove("score-updated"), 600);
-
-    updateScoreHighlight();
-}
-
-// Update score highlight based on scores
-function updateScoreHighlight() {
-    const oScoreValue = parseInt(oScoreElement.innerText);
-    const xScoreValue = parseInt(xScoreElement.innerText);
-
-    oScoreContainer.classList.toggle('highlight', oScoreValue > xScoreValue);
-    xScoreContainer.classList.toggle('highlight', xScoreValue > oScoreValue);
-
-    oTrophy.style.display = oScoreValue > xScoreValue ? 'inline' : 'none';
-    xTrophy.style.display = xScoreValue > oScoreValue ? 'inline' : 'none';
-}
-
-// Restart the game and reset states
-function restartGame() {
-    options.fill("");
-    restartBtn.classList.remove("bounce");
-
-    // Keep AI symbol consistent if AI mode is active
-    if (!isPlayingWithAi) {
-        currentPlayer = currentPlayer === "✖️" ? "⭕" : "✖️";
-    } else {
-        currentPlayer = aiSymbol === "✖️" ? "⭕" : "✖️";
-    }
-
-    updateStatusText(`${currentPlayer}'s turn`);
-    cells.forEach(cell => {
-        cell.style.backgroundColor = "";
-        cell.textContent = "";
-    });
-    running = true;
-
-    if (isPlayingWithAi && currentPlayer === aiSymbol) {
-        aiMove();
-    }
+    return null;
 }

@@ -45,18 +45,17 @@
 
 
 <body>
-
     <div id="gameContainer">
-
-        <h1>Tic Tac Toe</h1>
+        <h1 class="visually-hidden">Tic Tac Toe With AI</h1>
+        <p id="gameCountText" class="game-count">Game 1 of 6</p>
 
         <div id="scoreboard">
             <div id="oScoreContainer" class="score-container">
-                <p><span class="trophy-emoji" id="oTrophy" style="display: none;">🏆</span> ⭕ Wins: <span
+                <p><span class="trophy-emoji" id="oTrophy" style="display: none;">🏆</span> Human Wins: <span
                         id="oScore">0</span></p>
             </div>
             <div id="xScoreContainer" class="score-container">
-                <p><span class="trophy-emoji" id="xTrophy" style="display: none;">🏆</span> ✖️ Wins: <span
+                <p><span class="trophy-emoji" id="xTrophy" style="display: none;">🏆</span> AI Wins: <span
                         id="xScore">0</span></p>
             </div>
         </div>
@@ -64,32 +63,24 @@
         <h2 id="statusText"></h2>
 
         <div id="cellContainer">
-            <div cellIndex="0" class="cell"></div>
-            <div cellIndex="1" class="cell"></div>
-            <div cellIndex="2" class="cell"></div>
-            <div cellIndex="3" class="cell"></div>
-            <div cellIndex="4" class="cell"></div>
-            <div cellIndex="5" class="cell"></div>
-            <div cellIndex="6" class="cell"></div>
-            <div cellIndex="7" class="cell"></div>
-            <div cellIndex="8" class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
         </div>
 
         <div class="container">
-            <button class="btn" onclick="window.location.reload()">
+            <button id="newTournamentBtn" class="btn" onclick="window.location.reload()">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                     <path
                         d="M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z" />
                 </svg>
                 New Tournament
-            </button>
-
-            <button class="btn" id="playWithAIButton">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-                    <path
-                        d="M320 0c17.7 0 32 14.3 32 32l0 64 120 0c39.8 0 72 32.2 72 72l0 272c0 39.8-32.2 72-72 72l-304 0c-39.8 0-72-32.2-72-72l0-272c0-39.8 32.2-72 72-72l120 0 0-64c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224l16 0 0 192-16 0c-26.5 0-48-21.5-48-48l0-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-16 0 0-192 16 0z" />
-                </svg>
-                Play With AI
             </button>
 
             <button id="restartBtn" class="btn">
@@ -100,12 +91,8 @@
                 Reset Board
             </button>
         </div>
-
-
     </div>
-
     <script src="index.js"></script>
-
 </body>
 
 </html>
