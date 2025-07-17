@@ -30,6 +30,23 @@ body {
     border: 0;
 }
 
+/* Game count styling */
+.styled-count {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #ffd54f;
+    text-align: center;
+    background: rgba(255, 213, 79, 0.08);
+    padding: 6px 14px;
+    margin: 5px auto 10px auto;
+    border: 1px solid #ffd54f;
+    border-radius: 8px;
+    width: fit-content;
+    box-shadow: 0 0 6px rgba(255, 213, 79, 0.2);
+    transition: all 0.25s ease-in-out;
+}
+
+
 /* Layout styles */
 #gameContainer {
     font-family: 'Poppins', sans-serif;
@@ -291,6 +308,29 @@ body {
         opacity: 1;
     }
 }
+
+/* Shine animation */
+@keyframes shine {
+    0% {
+        background: rgba(255, 213, 79, 0.08);
+        box-shadow: 0 0 6px rgba(255, 213, 79, 0.2);
+    }
+
+    50% {
+        background: rgba(255, 213, 79, 0.3);
+        box-shadow: 0 0 15px rgba(255, 213, 79, 0.6);
+    }
+
+    100% {
+        background: rgba(255, 213, 79, 0.08);
+        box-shadow: 0 0 6px rgba(255, 213, 79, 0.2);
+    }
+}
+
+.shine-effect {
+    animation: shine 1s ease-in-out;
+}
+
 
 /* Responsive Layout for Mobile */
 @media (max-width: 768px) {

@@ -77,6 +77,8 @@ function getTurnText() {
 
 function updateGameCounterUI() {
     gameCountText.textContent = `Game ${gamesPlayed + 1} of ${totalGames}`;
+    gameCountText.classList.add("shine-effect");
+    setTimeout(() => gameCountText.classList.remove("shine-effect"), 3000);
 }
 
 function updateStatusText(text) {
