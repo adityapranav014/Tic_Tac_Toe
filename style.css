@@ -293,13 +293,11 @@ body {
 
 /* Responsive Layout for Mobile */
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
 
     #gameContainer {
         box-shadow: none;
         border: none;
+        padding: 12% 15%;
 
     }
 
