@@ -236,47 +236,82 @@ function makeMove(index) {
     checkWinner();
 }
 
-// Pre-compute winning lines
-const WIN_LINES = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],  // rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],  // cols
-    [0, 4, 8], [2, 4, 6]           // diagonals
-];
-
 // Simple cache for board evaluations (transposition table)
 const transposition = {};
 
+// Pattern library simulating memorized human strategies
+const patternLibrary = [
+    { X: [0, 8], O: [4], moves: [2, 6] },   // Corner trap: X in 0,8 and O in center
+    { X: [4], O: [0], moves: [8] },         // Opposite corner strategy
+    { X: [0, 2], O: [4], moves: [6] },      // Fork from 2 opposite corners
+    { X: [4], O: [2], moves: [6] },         // Mirror fork
+];
+
+// Checks if current board matches any strategic pattern
+function findPatternMove(board, currentPlayer) {
+    const mySymbol = currentPlayer;
+    const oppSymbol = currentPlayer === aiSymbol ? humanSymbol : aiSymbol;
+
+    for (let pattern of patternLibrary) {
+        let match = true;
+
+        if (pattern.X) {
+            for (let pos of pattern.X) {
+                if (board[pos] !== mySymbol) {
+                    match = false;
+                    break;
+                }
+            }
+        }
+        if (pattern.O && match) {
+            for (let pos of pattern.O) {
+                if (board[pos] !== oppSymbol) {
+                    match = false;
+                    break;
+                }
+            }
+        }
+
+        if (match) {
+            for (let move of pattern.moves) {
+                if (board[move] === "") {
+                    return move;
+                }
+            }
+        }
+    }
+    return null;
+}
+
 function findBestMove(board) {
-    // Use a key for caching (e.g. comma-separated)
     const key = board.join(',');
-    if (transposition[key]) {
-        return transposition[key];
-    }
+    if (transposition[key]) return transposition[key];
 
-    // 1. First move: pick center if empty
+    // 1. First move: take center if empty
     if (board.every(cell => cell === "")) {
-        return 4;
+        const highWinPattern = patternLibrary[Math.floor(Math.random() * patternLibrary.length)];
+        return highWinPattern.X[Math.floor(Math.random() * highWinPattern.X.length)];
     }
 
-    // 2. Win: If AI can win in one move, take it
+    // 2. Win: check if AI can win
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             board[i] = aiSymbol;
             if (checkWinnerStatic(board) === aiSymbol) {
-                board[i] = "";  // restore
+                board[i] = "";
                 transposition[key] = i;
                 return i;
             }
-            board[i] = "";  // restore
+            board[i] = "";
         }
     }
 
-    // 3. Block: If opponent can win in one move, block it
+    // 3. Block: check if human can win
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             board[i] = humanSymbol;
             if (checkWinnerStatic(board) === humanSymbol) {
-                board[i] = "";  // restore
+                board[i] = "";
                 transposition[key] = i;
                 return i;
             }
@@ -284,22 +319,20 @@ function findBestMove(board) {
         }
     }
 
-    // 4. Fork: Create a fork (two threats)
-    // Check all empty cells for AI fork
+    // 4. Fork: create a fork
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             board[i] = aiSymbol;
-            let winningMoves = 0;
-            // Count how many winning moves this creates
+            let forks = 0;
             for (let j = 0; j < board.length; j++) {
                 if (board[j] === "") {
                     board[j] = aiSymbol;
-                    if (checkWinnerStatic(board) === aiSymbol) winningMoves++;
+                    if (checkWinnerStatic(board) === aiSymbol) forks++;
                     board[j] = "";
                 }
             }
             board[i] = "";
-            if (winningMoves >= 2) {
+            if (forks >= 2) {
                 transposition[key] = i;
                 return i;
             }
@@ -307,35 +340,39 @@ function findBestMove(board) {
     }
 
     // 5. Block opponent's fork
-    // If the opponent has a fork opportunity, block it.
-    // Simplest approach: if there is only one fork, block it.
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             board[i] = humanSymbol;
-            let oppForks = 0;
+            let forks = 0;
             for (let j = 0; j < board.length; j++) {
                 if (board[j] === "") {
                     board[j] = humanSymbol;
-                    if (checkWinnerStatic(board) === humanSymbol) oppForks++;
+                    if (checkWinnerStatic(board) === humanSymbol) forks++;
                     board[j] = "";
                 }
             }
             board[i] = "";
-            if (oppForks >= 2) {
-                // Block this fork by playing here
+            if (forks >= 2) {
                 transposition[key] = i;
                 return i;
             }
         }
     }
 
-    // 6. Take center if free (Rule 5):contentReference[oaicite:11]{index=11}
+    // 6. Pattern recognition: human memorized winning sequences
+    const patternMove = findPatternMove(board, aiSymbol);
+    if (patternMove !== null) {
+        transposition[key] = patternMove;
+        return patternMove;
+    }
+
+    // 7. Take center if free
     if (board[4] === "") {
         transposition[key] = 4;
         return 4;
     }
 
-    // 7. Opposite corner: if opponent is in a corner, play opposite corner:contentReference[oaicite:12]{index=12}
+    // 8. Opposite corner strategy
     const corners = [[0, 8], [2, 6], [6, 2], [8, 0]];
     for (let [c, opp] of corners) {
         if (board[opp] === humanSymbol && board[c] === "") {
@@ -344,24 +381,23 @@ function findBestMove(board) {
         }
     }
 
-    // 8. Empty corner
+    // 9. Any corner
     const emptyCorners = [0, 2, 6, 8].filter(i => board[i] === "");
     if (emptyCorners.length) {
-        const choice = emptyCorners[0];  // pick first available corner
-        transposition[key] = choice;
-        return choice;
+        transposition[key] = emptyCorners[0];
+        return emptyCorners[0];
     }
 
-    // 9. Empty side
+    // 10. Any side
     const emptySides = [1, 3, 5, 7].filter(i => board[i] === "");
     if (emptySides.length) {
-        const choice = emptySides[0];
-        transposition[key] = choice;
-        return choice;
+        transposition[key] = emptySides[0];
+        return emptySides[0];
     }
 
-    // 10. Fallback: use Minimax
-    let bestScore = -Infinity, bestMove = -1;
+    // 11. Minimax fallback (unlikely needed but ensures perfect play)
+    let bestScore = -Infinity;
+    let bestMove = -1;
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             let tempBoard = [...board];
