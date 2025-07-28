@@ -72,7 +72,7 @@ function initializeGame() {
 }
 
 function getTurnText() {
-    return currentPlayer === aiSymbol ? "AI's turn" : "Human's turn";
+    return currentPlayer === aiSymbol ? "AI's turn" : "Your's turn";
 }
 
 function updateGameCounterUI() {
@@ -132,7 +132,7 @@ function checkWinner() {
         } catch (e) {
             // Ignore audio errors
         }
-        const winner = (currentPlayer === aiSymbol) ? "AI" : "Human";
+        const winner = (currentPlayer === aiSymbol) ? "AI" : "You";
         updateStatusText(`${winner} wins!`);
         updateScore(currentPlayer);
         running = false;
@@ -213,7 +213,7 @@ function restartGame() {
 function finalizeTournament() {
     running = false;
     const finalText = humanScore > aiScore
-        ? `🏁 Tournament Over! Human wins ${humanScore}–${aiScore}! 🏆`
+        ? `🏁 Tournament Over! You wins ${humanScore}–${aiScore}! 🏆`
         : aiScore > humanScore
             ? `🏁 Tournament Over! AI wins ${aiScore}–${humanScore}! 🤖`
             : `🏁 Tournament Over! It's a draw!`;
